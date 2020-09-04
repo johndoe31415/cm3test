@@ -5,7 +5,8 @@ PLL to 72 MHz from an 8 MHz HSE and creates a "blinky" on PB0, PB1 and PB2.
 ## Usage
 First, you need to download the STM32F10x standard peripheral library as a ZIP
 file. In my case this was called "en.stsw-stm32054.zip" and contained the
-subdirectory "STM32F10x_StdPeriph_Lib_V3.5.0/". Place this file in the `stdperiph/` subdirectory and compile it:
+subdirectory "STM32F10x_StdPeriph_Lib_V3.5.0/". Place this file in the
+`stdperiph/` subdirectory and compile it:
 
 ```
 $ make stdperiph -j16
