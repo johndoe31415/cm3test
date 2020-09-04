@@ -40,7 +40,8 @@ static void clock_switch_hsi_pll(void) {
 
 	/* HSE 8 MHz x 9 = 72 MHz */
 	/* Set PLL source to HSE */
-	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_PLLMULL) | RCC_CFGR_PLLMULL9 | RCC_CFGR_PLLSRC;
+	/* APB1 prescaler needs to be /2, 36 MHz max */
+	RCC->CFGR = RCC_CFGR_PLLMULL9 | RCC_CFGR_PLLSRC | RCC_CFGR_PPRE1_DIV2;
 
 	/* Enable the PLL */
 	RCC->CR |= RCC_CR_PLLON;
@@ -50,9 +51,6 @@ static void clock_switch_hsi_pll(void) {
 
 	/* Set Flash latency to two wait states */
 	FLASH_SetLatency(FLASH_Latency_2);
-
-	/* APB1 prescaler needs to be /2, 36 MHz max */
-	GPIOB->BSRR = GPIO_Pin_2;
 
 	/* Switch clock source to PLL */
 	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | RCC_CFGR_SW_PLL;
