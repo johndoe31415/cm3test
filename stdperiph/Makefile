@@ -35,6 +35,7 @@ extract:
 	ln -sf $(SUBDIR)/Libraries/STM32F10x_StdPeriph_Driver/inc include
 	ln -sf $(SUBDIR)/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x system
 	ln -sf $(SUBDIR)/Libraries/CMSIS/CM3/CoreSupport cmsis
+	sed -i 's/\(static __INLINE void [_a-zA-Z]\+\)()/\1(void)/g;' $(SUBDIR)/Libraries/CMSIS/CM3/CoreSupport/core_cm3.h
 
 stdperiph.a: $(OBJS)
 	$(AR) cm $@ $^
