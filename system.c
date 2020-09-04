@@ -38,9 +38,9 @@ static void clock_switch_hsi_pll(void) {
 	/* Wait for HSE to become ready */
 	while (!(RCC->CR & RCC_CR_HSERDY));
 
-	/* HSE 12 MHz x 6 = 72 MHz */
+	/* HSE 8 MHz x 9 = 72 MHz */
 	/* Set PLL source to HSE */
-	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_PLLMULL) | RCC_CFGR_PLLMULL6 | RCC_CFGR_PLLSRC;
+	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_PLLMULL) | RCC_CFGR_PLLMULL9 | RCC_CFGR_PLLSRC;
 
 	/* Enable the PLL */
 	RCC->CR |= RCC_CR_PLLON;
@@ -51,14 +51,14 @@ static void clock_switch_hsi_pll(void) {
 	/* Set Flash latency to two wait states */
 	FLASH_SetLatency(FLASH_Latency_2);
 
+	/* APB1 prescaler needs to be /2, 36 MHz max */
+	GPIOB->BSRR = GPIO_Pin_2;
+
 	/* Switch clock source to PLL */
 	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | RCC_CFGR_SW_PLL;
 
-	/* APB1 prescaler needs to be /2, 36 MHz max */
-
 	/* Wait for PLL to become active clock */
-//	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
-
+	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
 
 #if 0
 	/* Switch clock source to HSE */
@@ -66,23 +66,6 @@ static void clock_switch_hsi_pll(void) {
 
 	/* Wait for HSE to become active */
 	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_HSE);
-#endif
-
-#if 0
-	/* Set PLL multipler to x6 (8 MHz HSI * 6 = 48 MHz) */
-	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_PLLMUL) | RCC_CFGR_PLLMUL6;
-
-	/* Enable PLL */
-	RCC->CR |= RCC_CR_PLLON;
-
-	/* Wait for PLL to become ready */
-	while (!(RCC->CR & RCC_CR_PLLRDY));
-
-	/* Switch clock source to PLL */
-	RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | RCC_CFGR_SW_PLL;
-
-	/* Wait for PLL to become active */
-	while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
 #endif
 }
 
