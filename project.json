@@ -1,0 +1,16 @@
+{
+	"name": "cm3test",
+	"processor":	"stm32f103c8",
+	"target_clk":	72000000,
+	"clocksrc": 	"hse-pll",
+	"hse-freq":		10000000,
+	"pinmap": {
+		"PB0": { "name": "led_red", "mode": "out" },
+		"PB1": { "name": "led_yellow", "mode": "out" },
+		"PB2": { "name": "led_green", "mode": "out" }
+	},
+	"_comment": {
+		"PA9": { "name": "usart_tx", "mode": "af", "af": "USART1" },
+		"PA10": { "name": "usart_rx", "mode": "in", "af": "USART1" }
+	}
+}

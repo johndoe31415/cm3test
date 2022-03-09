@@ -1,34 +1,23 @@
-.PHONY: all clean build_spl openocd ocdconsole gdb reset flashdump program
+.PHONY: all clean openocd ocdconsole gdb reset flashdump program halgen
 
-TARGETS := cm3test cm3test.bin
+include Makefile.toolchain
 
-PREFIX := arm-none-eabi-
-CC := $(PREFIX)gcc
-OBJCOPY := $(PREFIX)objcopy
-OBJDUMP := $(PREFIX)objdump
-AR := $(PREFIX)ar
-GDB := $(PREFIX)gdb
+PROJECT_NAME := cm3test
+TARGETS := $(PROJECT_NAME) $(PROJECT_NAME).bin
 
-CFLAGS := $(CFLAGS) -std=c11
-CFLAGS += -Wall -Wmissing-prototypes -Wstrict-prototypes -Werror=implicit-function-declaration -Werror=format -Wimplicit-fallthrough -Wshadow
-CFLAGS += -Os -g3
-CFLAGS += -mcpu=cortex-m3 -mthumb
-#CFLAGS += -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mthumb
-CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -include stdperiph/configuration.h -Istdperiph/include -Istdperiph/system -Istdperiph/cmsis
-LDFLAGS := -Tstm32f103c8.ld
-WRITE_ADDR := 0x08000000
+LDFLAGS := -Tlinker.ld
 LDFLAGS += -Wl,--gc-sections
-#-nostdlib
 STATICLIBS := stdperiph/stdperiph.a
 
-OBJS := main.o system.o ivt.o
+OBJS := startup.o system.o init.o
+OBJS += main.o
 
 all: $(TARGETS)
 
 clean:
 	rm -f $(OBJS) $(TARGETS)
-	rm -f cm3test.sym flash.bin
+	rm -f $(PROJECT_NAME).sym flash.bin
 
 stdperiph:
 	make -C stdperiph
@@ -40,7 +29,7 @@ ocdconsole:
 	telnet 127.0.0.1 4444
 
 gdb:
-	$(GDB) -ex "target extended-remote :3333" cm3test
+	$(GDB) -ex "target extended-remote :3333" $(PROJECT_NAME)
 
 reset:
 	echo "reset halt; reset run" | nc -N 127.0.0.1 4444
@@ -48,16 +37,19 @@ reset:
 flashdump:
 	echo "reset halt; dump_image flash.bin 0x8000000 0x8000" | nc -N 127.0.0.1 4444
 
-program: cm3test.bin
-	echo "reset halt; program cm3test.bin 0x8000000 reset" | nc -N 127.0.0.1 4444
+program: $(PROJECT_NAME).bin
+	echo "reset halt; program $(PROJECT_NAME).bin 0x8000000 reset" | nc -N 127.0.0.1 4444
 
-cm3test: $(OBJS)
+halgen:
+	mcuconfig project.json .
+
+$(PROJECT_NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(STATICLIBS)
 
-cm3test.bin: cm3test
+$(PROJECT_NAME).bin: $(PROJECT_NAME)
 	$(OBJCOPY) -O binary $< $@
 
-cm3test.sym: cm3test.c
+$(PROJECT_NAME).sym: $(PROJECT_NAME).c
 	$(CC) $(CFLAGS) -E -dM -o $@ $<
 
 .c.o:
